@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Microsoft.Quantum.Intrinsic;
+using Microsoft.Quantum.Canon;
 using Microsoft.Quantum.Simulation.Core;
 using Microsoft.Quantum.Simulation.Simulators;
 
@@ -17,28 +19,50 @@ namespace Quantum.QuantumApplication
         {
             using (var qsim = new QuantumSimulator())
             {
-                TestHelloQ(qsim);
                 TestBell(qsim);
+                TestEntanglement(qsim);
             }
 
             System.Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
         }
 
-        public void TestHelloQ(QuantumSimulator qsim)
-        {
-            HelloQ.Run(qsim).Wait();
-        }
-
         public void TestBell(QuantumSimulator qsim)
         {
-            Result init = new Result[] { Result.Zero, Result.One };
+            Start("Bell");
+            Result[] init = new Result[] { Result.Zero, Result.One };
             foreach (Result vector in init)
             {
-                var res = Bell.Run(qsim, 1000, initial).Result;
+                var res = Bell.Run(qsim, 1000, vector).Result;
                 var (zeros, ones) = res;
-                System.Console.WriteLine($"Init:{initial,-4} 0s={numZeros,-4} 1s={numOnes,-4}");
+                System.Console.WriteLine($"Init:{vector,-4} 0s={zeros,-4} 1s={ones,-4}");
             }
+            End("Bell");
+        }
+
+        public void TestEntanglement(QuantumSimulator qsim)
+        {
+            Start("Entanglement");
+            System.Console.WriteLine($"Testing Entanglement operation");
+            Result[] init = new Result[] { Result.Zero, Result.One };
+            foreach (Result vector in init)
+            {
+                var res = Entanglement.Run(qsim, 1000, vector).Result;
+                var(zeros, ones, equal) = res;
+                System.Console.WriteLine(
+                    $"Init:{vector,-4} 0s={zeros,-4} 1s={ones,-4} agree={equal,-4}");
+            }
+            End("Entanglement");
+        }
+
+        private void Start(String op)
+        {
+            System.Console.WriteLine($"------------------ Testing {op} operation ------------------\n");
+        }
+
+        private void End(String op)
+        {
+            System.Console.WriteLine($"\n---------------- End of {op} operation test ----------------\n");
         }
     }
 }
